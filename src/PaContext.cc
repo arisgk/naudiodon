@@ -26,6 +26,9 @@ int PaCallback(const void *input, void *output, unsigned long frameCount,
                PaStreamCallbackFlags statusFlags, void *userData)
 {
   PaContext *paContext = (PaContext *)userData;
+
+  printf("status in callback %d\n", statusFlags);
+
   paContext->checkStatus(statusFlags);
   int inRetCode = paContext->hasInput() && paContext->readPaBuffer(input, frameCount) ? paContinue : paComplete;
   int outRetCode = paContext->hasOutput() && paContext->fillPaBuffer(output, frameCount) ? paContinue : paComplete;
@@ -186,11 +189,15 @@ void PaContext::quit()
 
 bool PaContext::readPaBuffer(const void *srcBuf, uint32_t frameCount)
 {
-  printf("frame count: %d, channel count: %d, sample bits: %f\n", mInOptions->channelCount(), mInOptions->sampleBits());
+  printf("frame count: %d, channel count: %d, sample bits: %f\n", frameCount, mInOptions->channelCount(), mInOptions->sampleBits());
 
   uint32_t bytesAvailable = frameCount * mInOptions->channelCount() * mInOptions->sampleBits() / 8;
+
+  printf("bytes available: %d\n", bytesAvailable);
+
   std::shared_ptr<Memory> chunk = Memory::makeNew(bytesAvailable);
   memcpy(chunk->buf(), srcBuf, bytesAvailable);
+
   mInChunks->push(std::make_shared<Chunk>(chunk));
   return true;
 }
