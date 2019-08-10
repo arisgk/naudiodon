@@ -186,7 +186,7 @@ void PaContext::quit()
 
 bool PaContext::readPaBuffer(const void *srcBuf, uint32_t frameCount)
 {
-  println("frame count: %d, channel count: %d, sample bits: %f", mInOptions->channelCount(), mInOptions->sampleBits());
+  printf("frame count: %d, channel count: %d, sample bits: %f\n", mInOptions->channelCount(), mInOptions->sampleBits());
 
   uint32_t bytesAvailable = frameCount * mInOptions->channelCount() * mInOptions->sampleBits() / 8;
   std::shared_ptr<Memory> chunk = Memory::makeNew(bytesAvailable);
