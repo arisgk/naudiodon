@@ -26,10 +26,6 @@ int PaCallback(const void *input, void *output, unsigned long frameCount,
                PaStreamCallbackFlags statusFlags, void *userData)
 {
   PaContext *paContext = (PaContext *)userData;
-
-  printf(statusFlags);
-  printf("\n\n");
-
   paContext->checkStatus(statusFlags);
   int inRetCode = paContext->hasInput() && paContext->readPaBuffer(input, frameCount) ? paContinue : paComplete;
   int outRetCode = paContext->hasOutput() && paContext->fillPaBuffer(output, frameCount) ? paContinue : paComplete;
