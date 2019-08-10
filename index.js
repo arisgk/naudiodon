@@ -13,10 +13,10 @@
   limitations under the License.
 */
 
-const { Readable, Writable, Duplex } = require('stream');
+const { Readable, Writable, Duplex } = require("stream");
 const portAudioBindings = require("bindings")("naudiodon.node");
 
-var SegfaultHandler = require('segfault-handler');
+var SegfaultHandler = require("segfault-handler");
 SegfaultHandler.registerHandler("crash.log");
 
 exports.SampleFormatFloat32 = 1;
@@ -34,31 +34,37 @@ function AudioIO(options) {
 
   const doRead = size => {
     audioIOAdon.read(size, (err, buf) => {
-      if (err)
-        process.nextTick(() => ioStream.emit('error', err));
-        ioStream.push(buf);
-      if (buf && buf.length < size)
-      ioStream.push(null);
+      console.log(size);
+      console.log(err);
+      console.log(buf);
+      console.log("----------");
+
+      if (err) process.nextTick(() => ioStream.emit("error", err));
+      ioStream.push(buf);
+      if (buf && buf.length < size) ioStream.push(null);
     });
   };
 
   const doWrite = (chunk, encoding, cb) => {
     audioIOAdon.write(chunk, err => {
-      if (err)
-        process.nextTick(() => ioStream.emit('error', err));
+      if (err) process.nextTick(() => ioStream.emit("error", err));
       cb();
     });
-  }
+  };
 
-  const readable = 'inOptions' in options;
-  const writable = 'outOptions' in options;
+  const readable = "inOptions" in options;
+  const writable = "outOptions" in options;
   if (readable && writable) {
     ioStream = new Duplex({
       allowHalfOpen: false,
       readableObjectMode: false,
       writableObjectMode: false,
-      readableHighWaterMark: options.inOptions ? options.inOptions.highwaterMark || 16384 : 16384,
-      writableHighWaterMark: options.outOptions ? options.outOptions.highwaterMark || 16384 : 16384,
+      readableHighWaterMark: options.inOptions
+        ? options.inOptions.highwaterMark || 16384
+        : 16384,
+      writableHighWaterMark: options.outOptions
+        ? options.outOptions.highwaterMark || 16384
+        : 16384,
       read: doRead,
       write: doWrite
     });
@@ -80,29 +86,27 @@ function AudioIO(options) {
   ioStream.start = () => audioIOAdon.start();
 
   ioStream.quit = cb => {
-    audioIOAdon.quit('WAIT', () => {
-      if (typeof cb === 'function')
-        cb();
+    audioIOAdon.quit("WAIT", () => {
+      if (typeof cb === "function") cb();
     });
-  }
+  };
 
   ioStream.abort = cb => {
-    audioIOAdon.quit('ABORT', () => {
-      if (typeof cb === 'function')
-        cb();
+    audioIOAdon.quit("ABORT", () => {
+      if (typeof cb === "function") cb();
     });
-  }
+  };
 
-  ioStream.on('close', () => {
-    console.log('AudioIO close');
+  ioStream.on("close", () => {
+    console.log("AudioIO close");
     ioStream.quit();
   });
-  ioStream.on('finish', () => {
-    console.log('AudioIO finish');
+  ioStream.on("finish", () => {
+    console.log("AudioIO finish");
     ioStream.quit();
   });
-  ioStream.on('end', () => console.log('AudioIO end'));
-  ioStream.on('error', err => console.error('AudioIO:', err));
+  ioStream.on("end", () => console.log("AudioIO end"));
+  ioStream.on("error", err => console.error("AudioIO:", err));
 
   return ioStream;
 }
